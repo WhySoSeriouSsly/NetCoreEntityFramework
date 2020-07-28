@@ -15,5 +15,14 @@ namespace Business.Contants
         public static string CategoryDeleted = "Kategori başarıyla silimdi";
         public static string CategoryUpdated = "Kategori başarıyla güncellendi";
 
+        public static string LoginSuccess = "Giriş Başarılı";
+        public static string UserNotFound = "Kullanıcı  Bulunamadı";
+        public static string WrongPassword = "Şifre Doğru değil";
+
+        public static string UserFound=" Sistemde  zaten böyle bir kullanıcı var";
+
+        public static string RegisterCompleted = "Kayıt Başarılı";
+
+        public static string TokenCreated = "Token Başarıyla oluşturdu.";
     }
 }

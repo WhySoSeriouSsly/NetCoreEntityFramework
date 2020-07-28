@@ -10,5 +10,7 @@ namespace Core.Utilities.Security.Jwt
     {
 
         AccessToken CreateToken(User user,List<OperationClaim> operationClaims);//Claims roller
+
+        //tokena eklenecekler user ve rolleri ile access token yapcak
     }                          //Kullanıcı bilgisi,Rolleri
 }

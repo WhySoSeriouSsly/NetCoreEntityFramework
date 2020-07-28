@@ -2,7 +2,7 @@
 using Business.Concrete;
 using DataAccess.Abstract;
 using DataAccess.Concrete.EntityFramework;
-using LightInject;
+using EasyNetQ.LightInject;
 using System;
 using System.Collections.Generic;
 using System.Text;

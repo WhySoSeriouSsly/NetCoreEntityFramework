@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using Core.Entities.Concrete;
+using Core.Extension;
 using Core.Utilities.Security.Encyption;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Configuration;
@@ -19,34 +22,54 @@ namespace Core.Utilities.Security.Jwt
         public JwtHelper(IConfiguration configuration)
         {
             Configuration = configuration;
-            _tokenOptions = Configuration.GetSection("TokenOptions").Get<TokenOptions>();
-            _accessTokenExpiration=DateTime.Now.AddMinutes(_tokenOptions.AccessTokenExpiration);
+            _tokenOptions = Configuration.GetSection("TokenOptions").Get<TokenOptions>();//appsettingsten token options bilgilerini alıp token optionsa bind ediyor. 
+            _accessTokenExpiration=DateTime.Now.AddMinutes(_tokenOptions.AccessTokenExpiration);//jetonun sona erecği zaman
         }
-        public AccessToken CreateToken(User user, List<OperationClaim> operationClaims)
+        public AccessToken CreateToken(User user, List<OperationClaim> operationClaims)//token optionsu okumak olucak amaç
         {
-            var securityKey = SecurityKeyHelper.CreateSecurityKey(_tokenOptions.SecurityKey);
+            var securityKey = SecurityKeyHelper.CreateSecurityKey(_tokenOptions.SecurityKey);//token oluşturucaz encrypt oluşuturuken anahtar lazım
+                           //new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_tokenoptions.SecurityKey);
             var signingCredentials = SigningCredentialsHelper.CreateCredentials(securityKey);
+            var jwt = CreatJwtSecurityToken(_tokenOptions, user, signingCredentials, operationClaims);
+            //bizde tokun mevcut  ama biz o tokeni elimizdeki bilgilere göre handlerle(işleyici) yazmamız gerek.
+
+            var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+            var token = jwtSecurityTokenHandler.WriteToken(jwt);//token stringe çevrildi
+
+            return new AccessToken
+            {
+                Token = token,
+                Expiration = _accessTokenExpiration
+            };
+
         }
 
+        //Güvenlik jetonu oluşturdu.
         public JwtSecurityToken CreatJwtSecurityToken(TokenOptions tokenOptions,User user,
-            SigningCredentials signingCredentials,List<OperationClaim> claims)
+            SigningCredentials signingCredentials,List<OperationClaim> claims)//token bilgi,kullanıcı bilgi,signingCrediantial,yetkiler
         {
             var jwt = new JwtSecurityToken(
-                issuer:tokenOptions.Issuer,
-                audience:tokenOptions.Audience,
-                expires:_accessTokenExpiration,
-                notBefore:DateTime.Now,
-                claims:operationClaims,
-                signingCredentials:signingCredentials
-                
-                );
+                issuer: tokenOptions.Issuer,
+                audience: tokenOptions.Audience,
+                expires: _accessTokenExpiration,
+                notBefore: DateTime.Now,//eğer tokenin expiresin bilgisi şuandan önceyse geçersiz
+                claims: SetClaims(user,claims),//bizden claim bilgisi istiyor.o yüzden claimleri set etmemiz lazım
+                signingCredentials: signingCredentials
+                                );
+            return jwt;
         }
 
         private IEnumerable<Claim> SetClaims(User user, List<OperationClaim> operationClaims)
         {
             var claims=new List<Claim>();
-            claims.Add(new Claim("email",user.Email));
-        }
+            claims.AddEmail(user.Email);
+            claims.AddNameIdentifier(user.Id.ToString());
+            claims.AddName($"{user.FirstName} {user.LastName}");
+            claims.AddRoles(operationClaims.Select(c=>c.Name).ToArray());
+            return claims;//ÇOK ÖNEMLİ LİST--->ARRAY
+            //claimlerin içinde email filan yok nameidentifer filan yok bunlar userdan eklenir.
+        }// Ama bu yanlış  onun için claim nesnesini uzatmamız laızm
+
 
     }//Signing
      //Credentials

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Core.Utilities.Results
 {
-    public interface IResult
+    public interface IResult//mesaj veriyor
     {
         bool Success { get; }
         string Message { get; }

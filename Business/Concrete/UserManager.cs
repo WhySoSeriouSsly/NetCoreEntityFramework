@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Business.Abstract;
 using Core.Entities.Concrete;
@@ -23,14 +24,15 @@ namespace Business.Concrete
 
         }
 
-        public void Add(User user)
+        public void Add(Core.Entities.Concrete.User user)
         {
             _userDal.Add(user);
         }
 
-        public User GetByMail(string email)
+        public Core.Entities.Concrete.User GetByMail(string email)
         {
             return _userDal.Get(u => u.Email == email);
+                //(Core.Entities.Concrete.User)_userDal.GetList().Where(u => u.Email == email);
         }
     }
 }
