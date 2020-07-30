@@ -24,9 +24,9 @@ namespace Business.Concrete
             return new SuccessResult(Messages.ProductAdded);//magic string
         }
 
-        public IResult Delete(Product product)
+        public IResult Delete(int productId)
         {
-            _productDal.Delete(product);
+            _productDal.Delete(new Product { ProductId=productId});
             return new SuccessResult(Messages.ProductDeleted);
 
         }
